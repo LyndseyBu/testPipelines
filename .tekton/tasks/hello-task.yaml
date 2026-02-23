@@ -17,4 +17,3 @@ spec:
         echo "$(params.greeting)"
         echo "Task completed successfully!"
 
-# Made with Bob

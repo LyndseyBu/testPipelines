@@ -29,12 +29,13 @@ kubectl get pods --namespace tekton-pipelines
 
 ```
 .
-├── tasks/
-│   └── hello-task.yaml          # Simple task definition
-├── pipelines/
-│   └── hello-pipeline.yaml      # Pipeline using the task
-├── runs/
-│   └── hello-pipeline-run.yaml  # PipelineRun to execute the pipeline
+├── .tekton/
+│   ├── tasks/
+│   │   └── hello-task.yaml          # Simple task definition
+│   ├── pipelines/
+│   │   └── hello-pipeline.yaml      # Pipeline using the task
+│   └── runs/
+│       └── hello-pipeline-run.yaml  # PipelineRun to execute the pipeline
 └── README.md
 ```
 
@@ -43,7 +44,7 @@ kubectl get pods --namespace tekton-pipelines
 ### 1. Apply the Task
 
 ```bash
-kubectl apply -f tasks/hello-task.yaml
+kubectl apply -f .tekton/tasks/hello-task.yaml
 ```
 
 Verify the task was created:
@@ -54,7 +55,7 @@ kubectl get tasks
 ### 2. Apply the Pipeline
 
 ```bash
-kubectl apply -f pipelines/hello-pipeline.yaml
+kubectl apply -f .tekton/pipelines/hello-pipeline.yaml
 ```
 
 Verify the pipeline was created:
@@ -65,7 +66,7 @@ kubectl get pipelines
 ### 3. Run the Pipeline
 
 ```bash
-kubectl apply -f runs/hello-pipeline-run.yaml
+kubectl apply -f .tekton/runs/hello-pipeline-run.yaml
 ```
 
 ### 4. Check the PipelineRun Status
@@ -86,7 +87,7 @@ tkn pipelinerun logs hello-pipeline-run -f
 
 ## Customization
 
-You can customize the greeting message by modifying the `message` parameter in [`runs/hello-pipeline-run.yaml`](runs/hello-pipeline-run.yaml:11):
+You can customize the greeting message by modifying the `message` parameter in [`.tekton/runs/hello-pipeline-run.yaml`](.tekton/runs/hello-pipeline-run.yaml:11):
 
 ```yaml
 params:
@@ -98,9 +99,9 @@ params:
 
 Remove all resources:
 ```bash
-kubectl delete -f runs/hello-pipeline-run.yaml
-kubectl delete -f pipelines/hello-pipeline.yaml
-kubectl delete -f tasks/hello-task.yaml
+kubectl delete -f .tekton/runs/hello-pipeline-run.yaml
+kubectl delete -f .tekton/pipelines/hello-pipeline.yaml
+kubectl delete -f .tekton/tasks/hello-task.yaml
 ```
 
 ## Resources
