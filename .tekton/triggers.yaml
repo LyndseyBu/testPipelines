@@ -1,0 +1,73 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: hello-trigger-binding
+spec:
+  params:
+    - name: message
+      value: $(body.message)
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: hello-trigger-template
+spec:
+  params:
+    - name: message
+      description: The message to pass to the pipeline
+      default: "Hello from Tekton Triggers!"
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: hello-pipeline-run-
+      spec:
+        pipelineRef:
+          name: hello-pipeline
+        params:
+          - name: message
+            value: $(tt.params.message)
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: hello-event-listener
+spec:
+  serviceAccountName: tekton-triggers-sa
+  triggers:
+    - name: hello-trigger
+      bindings:
+        - ref: hello-trigger-binding
+      template:
+        ref: hello-trigger-template
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tekton-triggers-sa
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: tekton-triggers-role
+rules:
+  - apiGroups: ["tekton.dev"]
+    resources: ["pipelineruns", "pipelineresources"]
+    verbs: ["create", "get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: tekton-triggers-rolebinding
+subjects:
+  - kind: ServiceAccount
+    name: tekton-triggers-sa
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: tekton-triggers-role
+
+# Made with Bob
