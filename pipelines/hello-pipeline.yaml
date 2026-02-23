@@ -1,0 +1,20 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: hello-pipeline
+  description: A simple pipeline that runs the hello-task
+spec:
+  params:
+    - name: message
+      type: string
+      description: The message to pass to the hello task
+      default: "Hello from Tekton Pipeline!"
+  tasks:
+    - name: say-hello
+      taskRef:
+        name: hello-task
+      params:
+        - name: greeting
+          value: "$(params.message)"
+
+# Made with Bob
