@@ -2,7 +2,7 @@ apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
   name: hello-pipeline
-  description: A simple pipeline that runs the hello-task
+  description: A simple pipeline with two sequential tasks
 spec:
   params:
     - name: message
@@ -23,10 +23,21 @@ spec:
             script: |
               #!/bin/sh
               echo "$(params.greeting)"
-              echo "Task completed successfully!"
+              echo "Task 1 completed successfully!"
       params:
         - name: greeting
           value: "$(params.message)"
+    - name: say-goodbye
+      runAfter:
+        - say-hello
+      taskSpec:
+        steps:
+          - name: echo
+            image: alpine:3.18
+            script: |
+              #!/bin/sh
+              echo "Goodbye from Task 2!"
+              echo "Pipeline execution complete!"
 ---
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
