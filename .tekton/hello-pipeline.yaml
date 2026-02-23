@@ -1,0 +1,43 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: hello-pipeline
+  description: A simple pipeline that runs the hello-task
+spec:
+  params:
+    - name: message
+      type: string
+      description: The message to pass to the hello task
+      default: "Hello from Tekton Pipeline!"
+  tasks:
+    - name: say-hello
+      taskSpec:
+        params:
+          - name: greeting
+            type: string
+            description: The greeting message to print
+            default: "Hello World"
+        steps:
+          - name: echo
+            image: alpine:3.18
+            script: |
+              #!/bin/sh
+              echo "$(params.greeting)"
+              echo "Task completed successfully!"
+      params:
+        - name: greeting
+          value: "$(params.message)"
+---
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: hello-pipeline-run
+  labels:
+    app: hello-example
+spec:
+  pipelineRef:
+    name: hello-pipeline
+  params:
+    - name: message
+      value: "Hello from my first PipelineRun!"
+

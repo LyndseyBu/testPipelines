@@ -30,44 +30,23 @@ kubectl get pods --namespace tekton-pipelines
 ```
 .
 ├── .tekton/
-│   ├── tasks/
-│   │   └── hello-task.yaml          # Simple task definition
-│   ├── pipelines/
-│   │   └── hello-pipeline.yaml      # Pipeline using the task
-│   └── runs/
-│       └── hello-pipeline-run.yaml  # PipelineRun to execute the pipeline
+│   └── hello-pipeline.yaml      # Pipeline with embedded task and PipelineRun
 └── README.md
 ```
 
 ## Usage
 
-### 1. Apply the Task
+### Apply the Pipeline and Run
+
+The `.tekton/hello-pipeline.yaml` file contains all resources in a single file using YAML document separators (`---`):
+- Pipeline definition with an embedded TaskSpec
+- PipelineRun to execute the pipeline
 
 ```bash
-kubectl apply -f .tekton/tasks/hello-task.yaml
+kubectl apply -f .tekton/hello-pipeline.yaml
 ```
 
-Verify the task was created:
-```bash
-kubectl get tasks
-```
-
-### 2. Apply the Pipeline
-
-```bash
-kubectl apply -f .tekton/pipelines/hello-pipeline.yaml
-```
-
-Verify the pipeline was created:
-```bash
-kubectl get pipelines
-```
-
-### 3. Run the Pipeline
-
-```bash
-kubectl apply -f .tekton/runs/hello-pipeline-run.yaml
-```
+This will create both the Pipeline and PipelineRun resources.
 
 ### 4. Check the PipelineRun Status
 
@@ -87,7 +66,7 @@ tkn pipelinerun logs hello-pipeline-run -f
 
 ## Customization
 
-You can customize the greeting message by modifying the `message` parameter in [`.tekton/runs/hello-pipeline-run.yaml`](.tekton/runs/hello-pipeline-run.yaml:11):
+You can customize the greeting message by modifying the `message` parameter in [`.tekton/hello-pipeline.yaml`](.tekton/hello-pipeline.yaml:40):
 
 ```yaml
 params:
@@ -95,13 +74,34 @@ params:
     value: "Your custom message here!"
 ```
 
+Or create a new PipelineRun with different parameters:
+
+```bash
+kubectl create -f - <<EOF
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: hello-pipeline-run-custom
+spec:
+  pipelineRef:
+    name: hello-pipeline
+  params:
+    - name: message
+      value: "Your custom message!"
+EOF
+```
+
 ## Cleanup
 
 Remove all resources:
 ```bash
-kubectl delete -f .tekton/runs/hello-pipeline-run.yaml
-kubectl delete -f .tekton/pipelines/hello-pipeline.yaml
-kubectl delete -f .tekton/tasks/hello-task.yaml
+kubectl delete -f .tekton/hello-pipeline.yaml
+```
+
+Or delete specific resources:
+```bash
+kubectl delete pipelinerun hello-pipeline-run
+kubectl delete pipeline hello-pipeline
 ```
 
 ## Resources
